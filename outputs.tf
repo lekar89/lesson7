@@ -32,3 +32,32 @@ output "eks_node_group_name" {
   description = "Name of the EKS managed node group"
   value       = module.eks.node_group_name
 }
+output "jenkins_namespace" {
+  description = "Namespace where Jenkins is installed"
+  value       = module.jenkins.namespace
+}
+
+output "jenkins_release_name" {
+  description = "Jenkins Helm release name"
+  value       = module.jenkins.release_name
+}
+
+output "jenkins_admin_user" {
+  description = "Jenkins administrator username"
+  value       = module.jenkins.admin_user
+}
+
+output "argocd_namespace" {
+  description = "Namespace where Argo CD is installed"
+  value       = module.argo_cd.namespace
+}
+
+output "argocd_release_name" {
+  description = "Argo CD Helm release name"
+  value       = module.argo_cd.release_name
+}
+
+output "argocd_application_name" {
+  description = "Name of the Argo CD Application"
+  value       = module.argo_cd.application_name
+}

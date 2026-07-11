@@ -1,0 +1,33 @@
+repositories:
+  - name: django-app-repository
+    url: https://github.com/lekar89/lesson7.git
+    type: git
+
+applications:
+  - name: django-app
+    namespace: argocd
+
+    project: default
+
+    source:
+      repoURL: https://github.com/lekar89/lesson7.git
+      targetRevision: lesson-8-9
+      path: charts/django-app
+
+      helm:
+        valueFiles:
+          - values.yaml
+
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: default
+
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+
+      syncOptions:
+        - CreateNamespace=true
+
+        

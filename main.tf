@@ -1,4 +1,3 @@
-
 terraform {
   required_version = ">= 1.10.0"
 
@@ -6,6 +5,16 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 6.0"
+    }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 3.0"
     }
   }
 }
@@ -65,4 +74,77 @@ module "eks" {
   desired_size = 3
   min_size     = 2
   max_size     = 3
+}
+
+data "aws_eks_cluster_auth" "main" {
+  name = module.eks.cluster_name
+
+  depends_on = [
+    module.eks
+  ]
+}
+
+provider "kubernetes" {
+  host = module.eks.cluster_endpoint
+
+  cluster_ca_certificate = base64decode(
+    module.eks.cluster_certificate_authority_data
+  )
+
+  token = data.aws_eks_cluster_auth.main.token
+}
+
+provider "helm" {
+  kubernetes = {
+    host = module.eks.cluster_endpoint
+
+    cluster_ca_certificate = base64decode(
+      module.eks.cluster_certificate_authority_data
+    )
+
+    token = data.aws_eks_cluster_auth.main.token
+  }
+}
+
+module "jenkins" {
+  source = "./modules/jenkins"
+
+  namespace      = "jenkins"
+  release_name   = "jenkins"
+  chart_version  = "5.9.25"
+  service_type   = "LoadBalancer"
+  admin_user     = "admin"
+  admin_password = "admin12345"
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
+
+  depends_on = [
+    module.eks
+  ]
+}
+
+module "argo_cd" {
+  source = "./modules/argo_cd"
+
+  namespace             = "argocd"
+  release_name          = "argocd"
+  chart_version         = "8.5.6"
+  service_type          = "LoadBalancer"
+  git_repo_url          = "https://github.com/lekar89/lesson7.git"
+  git_revision          = "lesson-8-9"
+  chart_path            = "charts/django-app"
+  application_name      = "django-app"
+  destination_namespace = "default"
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
+
+  depends_on = [
+    module.eks
+  ]
 }

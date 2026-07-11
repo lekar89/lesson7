@@ -1,0 +1,80 @@
+controller:
+  serviceType: LoadBalancer
+
+  admin:
+    username: admin
+   
+
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - credentials-binding
+    - pipeline-stage-view
+    - aws-credentials
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  jenkinsUrl: ""
+
+  JCasC:
+    defaultConfig: true
+
+persistence:
+  enabled: false
+
+agent:
+  enabled: true
+
+  podName: default
+  customJenkinsLabels:
+    - kubernetes-agent
+
+  yamlTemplate: |-
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      labels:
+        app: jenkins-agent
+    spec:
+      serviceAccountName: jenkins
+      restartPolicy: Never
+      containers:
+        - name: jnlp
+          image: jenkins/inbound-agent:latest-jdk21
+          args:
+            - $(JENKINS_SECRET)
+            - $(JENKINS_NAME)
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:v1.23.2-debug
+          command:
+            - /busybox/cat
+          tty: true
+          volumeMounts:
+            - name: docker-config
+              mountPath: /kaniko/.docker
+
+        - name: git
+          image: alpine/git:2.47.2
+          command:
+            - cat
+          tty: true
+
+      volumes:
+        - name: docker-config
+          emptyDir: {}
