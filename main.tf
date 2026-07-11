@@ -1,0 +1,68 @@
+
+terraform {
+  required_version = ">= 1.10.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Project   = "lesson-7"
+      ManagedBy = "Terraform"
+      Owner     = "Vladyslav"
+    }
+  }
+}
+
+module "vpc" {
+  source = "./modules/vpc"
+
+  project_name = "lesson-7"
+  cluster_name = "lesson-7-eks"
+
+  vpc_cidr = "10.0.0.0/16"
+
+  public_subnet_cidrs = [
+    "10.0.1.0/24",
+    "10.0.2.0/24"
+  ]
+
+  private_subnet_cidrs = [
+    "10.0.3.0/24",
+    "10.0.4.0/24"
+  ]
+
+  availability_zones = [
+    "us-east-1a",
+    "us-east-1b"
+  ]
+}
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository_name = "lesson-7-django"
+}
+
+module "eks" {
+  source = "./modules/eks"
+
+  cluster_name    = "lesson-7-eks"
+  node_group_name = "lesson-7-nodes"
+
+  subnet_ids = module.vpc.public_subnet_ids
+
+  instance_types = ["t3.micro"]
+
+  desired_size = 3
+  min_size     = 2
+  max_size     = 3
+}

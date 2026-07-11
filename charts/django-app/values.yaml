@@ -1,0 +1,32 @@
+replicaCount: 2
+
+image:
+  repository: 058862856673.dkr.ecr.us-east-1.amazonaws.com/lesson-7-django
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 8000
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+
+config:
+  DJANGO_SECRET_KEY: "lesson-7-secret-key"
+  DJANGO_DEBUG: "false"
+  DJANGO_ALLOWED_HOSTS: "*"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
