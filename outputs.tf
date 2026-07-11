@@ -61,3 +61,53 @@ output "argocd_application_name" {
   description = "Name of the Argo CD Application"
   value       = module.argo_cd.application_name
 }
+
+output "database_type" {
+  description = "Created database type"
+  value       = module.rds.database_type
+}
+
+output "database_endpoint" {
+  description = "Primary database endpoint"
+  value       = module.rds.endpoint
+}
+
+output "database_port" {
+  description = "Database port"
+  value       = module.rds.port
+}
+
+output "database_name" {
+  description = "Initial database name"
+  value       = module.rds.database_name
+}
+
+output "database_security_group_id" {
+  description = "Security group ID used by the database"
+  value       = module.rds.security_group_id
+}
+
+output "database_subnet_group_name" {
+  description = "DB subnet group name"
+  value       = module.rds.subnet_group_name
+}
+
+output "database_parameter_group_name" {
+  description = "Database parameter group name"
+  value       = module.rds.parameter_group_name
+}
+
+output "rds_instance_id" {
+  description = "Standard RDS instance ID"
+  value       = module.rds.rds_instance_id
+}
+
+output "aurora_cluster_id" {
+  description = "Aurora cluster ID"
+  value       = module.rds.aurora_cluster_id
+}
+
+output "aurora_reader_endpoint" {
+  description = "Aurora reader endpoint"
+  value       = module.rds.aurora_reader_endpoint
+}

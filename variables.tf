@@ -21,3 +21,44 @@ variable "github_branch" {
   type        = string
   default     = "lesson-8-9"
 }
+
+variable "database_password" {
+  description = "Master password for RDS or Aurora"
+  type        = string
+  sensitive   = true
+}
+
+variable "use_aurora" {
+  description = "Create Aurora when true, otherwise create standard RDS"
+  type        = bool
+  default     = false
+}
+
+variable "database_engine" {
+  description = "Database engine: postgres or mysql"
+  type        = string
+  default     = "postgres"
+
+  validation {
+    condition     = contains(["postgres", "mysql"], var.database_engine)
+    error_message = "database_engine must be postgres or mysql."
+  }
+}
+
+variable "database_engine_version" {
+  description = "Database engine version"
+  type        = string
+  default     = "16.4"
+}
+
+variable "database_instance_class" {
+  description = "Instance class for RDS or Aurora"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "database_multi_az" {
+  description = "Enable Multi-AZ for standard RDS"
+  type        = bool
+  default     = false
+}

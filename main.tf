@@ -55,6 +55,48 @@ module "vpc" {
   ]
 }
 
+module "rds" {
+  source = "./modules/rds"
+
+  project_name = "lesson-db-module"
+
+  use_aurora = var.use_aurora
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnet_ids
+
+  allowed_cidr_blocks = [
+    "10.0.0.0/16"
+  ]
+
+  engine         = var.database_engine
+  engine_version = var.database_engine_version
+  instance_class = var.database_instance_class
+
+  database_name = "appdb"
+  username      = "dbadmin"
+  password      = var.database_password
+
+  allocated_storage     = 20
+  max_allocated_storage = 100
+  storage_type          = "gp3"
+
+  multi_az              = var.database_multi_az
+  publicly_accessible   = false
+  deletion_protection   = false
+  skip_final_snapshot   = true
+  aurora_instance_count = 1
+
+  max_connections = "100"
+  log_statement   = "none"
+  work_mem        = "4096"
+
+  tags = {
+    Environment = "homework"
+    Lesson      = "db-module"
+  }
+}
+
 module "ecr" {
   source = "./modules/ecr"
 
