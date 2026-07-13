@@ -26,7 +26,7 @@ resource "aws_eks_cluster" "main" {
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
-    subnet_ids              = var.subnet_ids
+    subnet_ids              = var.cluster_subnet_ids
     endpoint_private_access = true
     endpoint_public_access  = true
   }
@@ -77,7 +77,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = var.node_group_name
   node_role_arn   = aws_iam_role.eks_nodes.arn
-  subnet_ids      = var.subnet_ids
+  subnet_ids      = var.node_subnet_ids
   instance_types  = var.instance_types
   capacity_type   = "ON_DEMAND"
 
