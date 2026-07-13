@@ -25,14 +25,12 @@ variable "service_type" {
 variable "admin_user" {
   description = "Jenkins administrator username"
   type        = string
-  default     = "admin"
 }
 
 variable "admin_password" {
   description = "Jenkins administrator password"
   type        = string
   sensitive   = true
-  default     = "admin12345"
 }
 
 variable "storage_size" {

@@ -73,3 +73,7 @@ output "nat_gateway_public_ip" {
   value       = module.vpc.nat_gateway_public_ip
 
 }
+output "jenkins_service_name" {
+  description = "Jenkins controller service name"
+  value       = module.jenkins.service_name
+}
