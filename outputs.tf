@@ -32,6 +32,7 @@ output "eks_node_group_name" {
   description = "Name of the EKS managed node group"
   value       = module.eks.node_group_name
 }
+
 output "jenkins_namespace" {
   description = "Namespace where Jenkins is installed"
   value       = module.jenkins.namespace
@@ -61,6 +62,7 @@ output "argocd_application_name" {
   description = "Name of the Argo CD Application"
   value       = module.argo_cd.application_name
 }
+
 output "nat_gateway_id" {
   description = "NAT Gateway ID"
   value       = module.vpc.nat_gateway_id
