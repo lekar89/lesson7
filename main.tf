@@ -153,6 +153,7 @@ module "argo_cd" {
     module.eks
   ]
 
+}
 module "s3_backend" {
   source = "./modules/s3-backend"
 
