@@ -152,6 +152,7 @@ module "argo_cd" {
   depends_on = [
     module.eks
   ]
+}
 module "s3_backend" {
   source = "./modules/s3-backend"
 
