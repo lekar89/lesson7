@@ -60,4 +60,12 @@ output "argocd_release_name" {
 output "argocd_application_name" {
   description = "Name of the Argo CD Application"
   value       = module.argo_cd.application_name
+output "nat_gateway_id" {
+  description = "NAT Gateway ID"
+  value       = module.vpc.nat_gateway_id
+}
+
+output "nat_gateway_public_ip" {
+  description = "NAT Gateway public IP"
+  value       = module.vpc.nat_gateway_public_ip
 }

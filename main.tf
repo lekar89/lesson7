@@ -67,7 +67,12 @@ module "eks" {
   cluster_name    = "lesson-7-eks"
   node_group_name = "lesson-7-nodes"
 
-  subnet_ids = module.vpc.public_subnet_ids
+  cluster_subnet_ids = concat(
+    module.vpc.public_subnet_ids,
+    module.vpc.private_subnet_ids
+  )
+
+  node_subnet_ids = module.vpc.private_subnet_ids
 
   instance_types = ["t3.micro"]
 
@@ -147,4 +152,14 @@ module "argo_cd" {
   depends_on = [
     module.eks
   ]
+module "s3_backend" {
+  source = "./modules/s3-backend"
+
+  bucket_name         = "terraform-state-bucket-vl-01"
+  dynamodb_table_name = "terraform-locks"
+
+  tags = {
+    Project = "lesson-7"
+    Lesson  = "5"
+  }
 }
