@@ -32,3 +32,12 @@ output "eks_node_group_name" {
   description = "Name of the EKS managed node group"
   value       = module.eks.node_group_name
 }
+output "nat_gateway_id" {
+  description = "NAT Gateway ID"
+  value       = module.vpc.nat_gateway_id
+}
+
+output "nat_gateway_public_ip" {
+  description = "NAT Gateway public IP"
+  value       = module.vpc.nat_gateway_public_ip
+}
