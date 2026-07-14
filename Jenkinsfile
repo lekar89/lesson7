@@ -49,7 +49,7 @@ spec:
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '058862856673'
-        ECR_REPOSITORY = 'lesson-8-9-django'
+        ECR_REPOSITORY = 'final-project-django'
 
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         IMAGE_TAG = "build-${BUILD_NUMBER}"

@@ -62,3 +62,14 @@ variable "database_multi_az" {
   type        = bool
   default     = false
 }
+variable "grafana_admin_user" {
+  description = "Grafana administrator username"
+  type        = string
+  default     = "admin"
+}
+
+variable "grafana_admin_password" {
+  description = "Grafana administrator password"
+  type        = string
+  sensitive   = true
+}

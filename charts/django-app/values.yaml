@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: 058862856673.dkr.ecr.us-east-1.amazonaws.com/lesson-7-django
+  repository: 058862856673.dkr.ecr.us-east-1.amazonaws.com/final-project-django
   tag: latest
   pullPolicy: Always
 
@@ -16,10 +16,10 @@ config:
   DJANGO_DEBUG: "false"
   DJANGO_ALLOWED_HOSTS: "*"
 
-  POSTGRES_HOST: "postgres-db"
+  POSTGRES_HOST: "final-project-rds.c6d6sq4gsqjo.us-east-1.rds.amazonaws.com"
   POSTGRES_PORT: "5432"
-  POSTGRES_USER: "django_user"
-  POSTGRES_DB: "django_db"
+  POSTGRES_USER: "dbadmin"
+  POSTGRES_DB: "appdb"
 
 secret:
   DJANGO_SECRET_KEY: "lesson-7-secret-key"

@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket       = "terraform-state-bucket-vl-01"
-    key          = "lesson-7/terraform.tfstate"
+    key          = "final-project/terraform.tfstate"
     region       = "us-east-1"
     encrypt      = true
     use_lockfile = true

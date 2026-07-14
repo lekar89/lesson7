@@ -128,3 +128,22 @@ output "jenkins_service_name" {
   value       = module.jenkins.service_name
 
 }
+output "monitoring_namespace" {
+  description = "Namespace where monitoring stack is installed"
+  value       = module.monitoring.namespace
+}
+
+output "monitoring_release_name" {
+  description = "Monitoring Helm release name"
+  value       = module.monitoring.release_name
+}
+
+output "grafana_service_name" {
+  description = "Grafana Kubernetes service name"
+  value       = module.monitoring.grafana_service_name
+}
+
+output "prometheus_service_name" {
+  description = "Prometheus Kubernetes service name"
+  value       = module.monitoring.prometheus_service_name
+}

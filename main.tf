@@ -24,7 +24,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project   = "lesson-8-9"
+      Project   = "final-project"
       ManagedBy = "Terraform"
       Owner     = "Vladyslav"
     }
@@ -34,8 +34,8 @@ provider "aws" {
 module "vpc" {
   source = "./modules/vpc"
 
-  project_name = "lesson-8-9"
-  cluster_name = "lesson-8-9-eks"
+  project_name = "final-project"
+  cluster_name = "final-project-eks"
 
   vpc_cidr = "10.0.0.0/16"
 
@@ -61,7 +61,7 @@ module "vpc" {
 module "rds" {
   source = "./modules/rds"
 
-  project_name = "lesson-db-module"
+  project_name = "final-project"
 
   use_aurora = var.use_aurora
 
@@ -95,22 +95,22 @@ module "rds" {
   work_mem        = "4096"
 
   tags = {
-    Environment = "homework"
-    Lesson      = "db-module"
+    Environment = "final"
+    Lesson      = "final-project"
   }
 }
 
 module "ecr" {
   source = "./modules/ecr"
 
-  repository_name = "lesson-8-9-django"
+  repository_name = "final-project-django"
 }
 
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name    = "lesson-8-9-eks"
-  node_group_name = "lesson-8-9-nodes"
+  cluster_name    = "final-project-eks"
+  node_group_name = "final-project-nodes"
 
   cluster_subnet_ids = concat(
     module.vpc.public_subnet_ids,
@@ -119,11 +119,11 @@ module "eks" {
 
   node_subnet_ids = module.vpc.private_subnet_ids
 
-  instance_types = ["t3.micro"]
+  instance_types = ["t3.small"]
 
   desired_size = 4
   min_size     = 3
-  max_size     = 4
+  max_size     = 5
 }
 
 data "aws_eks_cluster_auth" "main" {
@@ -200,6 +200,26 @@ module "argo_cd" {
   ]
 
 }
+
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  namespace              = "monitoring"
+  release_name           = "monitoring"
+  chart_version          = "83.6.0"
+  grafana_admin_user     = var.grafana_admin_user
+  grafana_admin_password = var.grafana_admin_password
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
+
+  depends_on = [
+    module.eks
+  ]
+}
+
 module "s3_backend" {
   source = "./modules/s3-backend"
 
@@ -207,7 +227,7 @@ module "s3_backend" {
   dynamodb_table_name = "terraform-locks"
 
   tags = {
-    Project = "lesson-7"
-    Lesson  = "5"
+    Project = "final-project"
+    Lesson  = "final"
   }
 }
