@@ -40,3 +40,34 @@ resource "helm_release" "monitoring" {
     kubernetes_namespace_v1.monitoring
   ]
 }
+resource "kubernetes_service_v1" "grafana_alias" {
+  metadata {
+    name      = "grafana"
+    namespace = kubernetes_namespace_v1.monitoring.metadata[0].name
+
+    labels = {
+      app       = "grafana"
+      managedBy = "terraform"
+    }
+  }
+
+  spec {
+    selector = {
+      "app.kubernetes.io/name"     = "grafana"
+      "app.kubernetes.io/instance" = var.release_name
+    }
+
+    port {
+      name        = "http"
+      port        = 80
+      target_port = "3000"
+      protocol    = "TCP"
+    }
+
+    type = "ClusterIP"
+  }
+
+  depends_on = [
+    helm_release.monitoring
+  ]
+}
