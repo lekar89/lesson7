@@ -13,9 +13,17 @@ service:
   targetPort: 8000
 
 config:
-  DJANGO_SECRET_KEY: "lesson-7-secret-key"
   DJANGO_DEBUG: "false"
   DJANGO_ALLOWED_HOSTS: "*"
+
+  POSTGRES_HOST: "postgres-db"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "django_user"
+  POSTGRES_DB: "django_db"
+
+secret:
+  DJANGO_SECRET_KEY: "lesson-7-secret-key"
+  POSTGRES_PASSWORD: "django_password"
 
 resources:
   requests:

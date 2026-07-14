@@ -4,7 +4,6 @@ controller:
   admin:
     username: admin
    
-
   installPlugins:
     - kubernetes
     - workflow-aggregator

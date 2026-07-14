@@ -32,6 +32,7 @@ output "eks_node_group_name" {
   description = "Name of the EKS managed node group"
   value       = module.eks.node_group_name
 }
+
 output "jenkins_namespace" {
   description = "Namespace where Jenkins is installed"
   value       = module.jenkins.namespace
@@ -61,6 +62,7 @@ output "argocd_application_name" {
   description = "Name of the Argo CD Application"
   value       = module.argo_cd.application_name
 }
+
 
 output "database_type" {
   description = "Created database type"
@@ -110,4 +112,19 @@ output "aurora_cluster_id" {
 output "aurora_reader_endpoint" {
   description = "Aurora reader endpoint"
   value       = module.rds.aurora_reader_endpoint
+}
+output "nat_gateway_id" {
+  description = "NAT Gateway ID"
+  value       = module.vpc.nat_gateway_id
+}
+
+output "nat_gateway_public_ip" {
+  description = "NAT Gateway public IP"
+  value       = module.vpc.nat_gateway_public_ip
+
+}
+output "jenkins_service_name" {
+  description = "Jenkins controller service name"
+  value       = module.jenkins.service_name
+
 }

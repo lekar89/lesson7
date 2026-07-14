@@ -5,6 +5,10 @@ metadata:
   labels:
     app: {{ .Release.Name }}
 data:
-  DJANGO_SECRET_KEY: {{ .Values.config.DJANGO_SECRET_KEY | quote }}
   DJANGO_DEBUG: {{ .Values.config.DJANGO_DEBUG | quote }}
   DJANGO_ALLOWED_HOSTS: {{ .Values.config.DJANGO_ALLOWED_HOSTS | quote }}
+
+  POSTGRES_HOST: {{ .Values.config.POSTGRES_HOST | quote }}
+  POSTGRES_PORT: {{ .Values.config.POSTGRES_PORT | quote }}
+  POSTGRES_USER: {{ .Values.config.POSTGRES_USER | quote }}
+  POSTGRES_DB: {{ .Values.config.POSTGRES_DB | quote }}
