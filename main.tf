@@ -155,6 +155,32 @@ provider "helm" {
     token = data.aws_eks_cluster_auth.main.token
   }
 }
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  namespace  = "kube-system"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  version    = "3.13.1"
+
+  set = [
+    {
+      name  = "args[0]"
+      value = "--kubelet-preferred-address-types=InternalIP"
+    },
+    {
+      name  = "args[1]"
+      value = "--kubelet-insecure-tls"
+    }
+  ]
+
+  timeout         = 600
+  wait            = true
+  cleanup_on_fail = true
+
+  depends_on = [
+    module.eks
+  ]
+}
 
 module "jenkins" {
   source = "./modules/jenkins"
