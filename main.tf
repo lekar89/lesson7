@@ -24,7 +24,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project   = "lesson-7"
+      Project   = "lesson-8-9"
       ManagedBy = "Terraform"
       Owner     = "Vladyslav"
     }
@@ -34,24 +34,27 @@ provider "aws" {
 module "vpc" {
   source = "./modules/vpc"
 
-  project_name = "lesson-7"
-  cluster_name = "lesson-7-eks"
+  project_name = "lesson-8-9"
+  cluster_name = "lesson-8-9-eks"
 
   vpc_cidr = "10.0.0.0/16"
 
   public_subnet_cidrs = [
     "10.0.1.0/24",
-    "10.0.2.0/24"
+    "10.0.2.0/24",
+    "10.0.3.0/24"
   ]
 
   private_subnet_cidrs = [
-    "10.0.3.0/24",
-    "10.0.4.0/24"
+    "10.0.4.0/24",
+    "10.0.5.0/24",
+    "10.0.6.0/24"
   ]
 
   availability_zones = [
     "us-east-1a",
-    "us-east-1b"
+    "us-east-1b",
+    "us-east-1c"
   ]
 }
 
@@ -100,22 +103,27 @@ module "rds" {
 module "ecr" {
   source = "./modules/ecr"
 
-  repository_name = "lesson-7-django"
+  repository_name = "lesson-8-9-django"
 }
 
 module "eks" {
   source = "./modules/eks"
 
-  cluster_name    = "lesson-7-eks"
-  node_group_name = "lesson-7-nodes"
+  cluster_name    = "lesson-8-9-eks"
+  node_group_name = "lesson-8-9-nodes"
 
-  subnet_ids = module.vpc.public_subnet_ids
+  cluster_subnet_ids = concat(
+    module.vpc.public_subnet_ids,
+    module.vpc.private_subnet_ids
+  )
+
+  node_subnet_ids = module.vpc.private_subnet_ids
 
   instance_types = ["t3.micro"]
 
-  desired_size = 3
-  min_size     = 2
-  max_size     = 3
+  desired_size = 4
+  min_size     = 3
+  max_size     = 4
 }
 
 data "aws_eks_cluster_auth" "main" {
@@ -155,8 +163,9 @@ module "jenkins" {
   release_name   = "jenkins"
   chart_version  = "5.9.25"
   service_type   = "LoadBalancer"
-  admin_user     = "admin"
-  admin_password = "admin12345"
+  admin_user     = var.jenkins_admin_user
+  admin_password = var.jenkins_admin_password
+
 
   providers = {
     kubernetes = kubernetes
@@ -175,8 +184,8 @@ module "argo_cd" {
   release_name          = "argocd"
   chart_version         = "8.5.6"
   service_type          = "LoadBalancer"
-  git_repo_url          = "https://github.com/lekar89/lesson7.git"
-  git_revision          = "lesson-8-9"
+  git_repo_url          = var.github_repository_url
+  git_revision          = var.github_branch
   chart_path            = "charts/django-app"
   application_name      = "django-app"
   destination_namespace = "default"
@@ -189,4 +198,16 @@ module "argo_cd" {
   depends_on = [
     module.eks
   ]
+
+}
+module "s3_backend" {
+  source = "./modules/s3-backend"
+
+  bucket_name         = "terraform-state-bucket-vl-01"
+  dynamodb_table_name = "terraform-locks"
+
+  tags = {
+    Project = "lesson-7"
+    Lesson  = "5"
+  }
 }

@@ -17,3 +17,7 @@ output "application_name" {
   description = "Argo CD Application name"
   value       = var.application_name
 }
+output "applications_release_name" {
+  description = "Helm release that creates Argo CD applications"
+  value       = helm_release.argocd_apps.name
+}
