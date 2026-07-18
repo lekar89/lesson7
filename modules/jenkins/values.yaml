@@ -43,7 +43,7 @@ agent:
       labels:
         app: jenkins-agent
     spec:
-      serviceAccountName: jenkins
+      serviceAccountName: jenkins-agent
       restartPolicy: Never
       containers:
         - name: jnlp

@@ -23,3 +23,12 @@ output "admin_password" {
   value       = var.admin_password
   sensitive   = true
 }
+output "controller_service_account_name" {
+  description = "Jenkins controller service account name"
+  value       = kubernetes_service_account_v1.jenkins_controller.metadata[0].name
+}
+
+output "agent_service_account_name" {
+  description = "Jenkins agent service account name"
+  value       = kubernetes_service_account_v1.jenkins_agent.metadata[0].name
+}

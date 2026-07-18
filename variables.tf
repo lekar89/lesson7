@@ -73,3 +73,8 @@ variable "grafana_admin_password" {
   type        = string
   sensitive   = true
 }
+variable "django_secret_key" {
+  description = "Secret key used by the Django application"
+  type        = string
+  sensitive   = true
+}

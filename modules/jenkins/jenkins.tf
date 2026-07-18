@@ -32,6 +32,24 @@ resource "helm_release" "jenkins" {
     {
       name  = "controller.admin.password"
       value = var.admin_password
+    },
+
+
+    {
+      name  = "serviceAccount.create"
+      value = "false"
+    },
+    {
+      name  = "serviceAccount.name"
+      value = var.controller_service_account_name
+    },
+    {
+      name  = "rbac.create"
+      value = "false"
+    },
+    {
+      name  = "agent.serviceAccount"
+      value = var.agent_service_account_name
     }
   ]
 
@@ -41,6 +59,11 @@ resource "helm_release" "jenkins" {
   cleanup_on_fail = true
 
   depends_on = [
-    kubernetes_namespace_v1.jenkins
+    kubernetes_namespace_v1.jenkins,
+    kubernetes_service_account_v1.jenkins_controller,
+    kubernetes_service_account_v1.jenkins_agent,
+    kubernetes_role_v1.jenkins_controller,
+    kubernetes_role_binding_v1.jenkins_controller
+
   ]
 }

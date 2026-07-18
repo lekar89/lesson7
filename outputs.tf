@@ -147,3 +147,17 @@ output "prometheus_service_name" {
   description = "Prometheus Kubernetes service name"
   value       = module.monitoring.prometheus_service_name
 }
+output "ebs_csi_irsa_role_arn" {
+  description = "IAM role ARN used by the Amazon EBS CSI driver"
+  value       = module.eks.ebs_csi_irsa_role_arn
+}
+
+output "ebs_csi_addon_name" {
+  description = "Amazon EBS CSI add-on name"
+  value       = module.eks.ebs_csi_addon_name
+}
+
+output "eks_oidc_provider_arn" {
+  description = "IAM OIDC provider ARN for the EKS cluster"
+  value       = module.eks.oidc_provider_arn
+}

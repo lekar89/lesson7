@@ -11,7 +11,7 @@ metadata:
   labels:
     app: django-kaniko-agent
 spec:
-  serviceAccountName: jenkins
+  serviceAccountName: jenkins-agent
   restartPolicy: Never
 
   containers:

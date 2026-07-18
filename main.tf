@@ -16,6 +16,11 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 3.0"
     }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -222,7 +227,8 @@ module "argo_cd" {
   }
 
   depends_on = [
-    module.eks
+    module.eks,
+    kubernetes_secret_v1.django_app
   ]
 
 }

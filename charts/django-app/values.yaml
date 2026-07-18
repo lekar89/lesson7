@@ -22,8 +22,8 @@ config:
   POSTGRES_DB: "appdb"
 
 secret:
-  DJANGO_SECRET_KEY: "lesson-7-secret-key"
-  POSTGRES_PASSWORD: "django_password"
+  create: false
+  name: django-app-secret
 
 resources:
   requests:
