@@ -8,6 +8,7 @@
 * public і private subnet-и у трьох Availability Zones;
 * Internet Gateway і NAT Gateway;
 * Amazon EKS;
+* Amazon EBS CSI Driver з IRSA;
 * Amazon ECR;
 * Amazon RDS PostgreSQL;
 * Jenkins;
@@ -120,6 +121,29 @@ Maximum size: 5
 * `AmazonEKS_CNI_Policy`;
 * `AmazonEC2ContainerRegistryPullOnly`.
 
+### Amazon EBS CSI Driver та IRSA
+
+Amazon EBS CSI Driver встановлюється як керований EKS add-on і забезпечує підтримку Kubernetes Persistent Volumes на базі Amazon EBS.
+
+Terraform створює:
+
+* IAM OIDC Provider для EKS;
+* IAM role для EBS CSI controller;
+* attachment політики `AmazonEBSCSIDriverPolicyV2`;
+* EKS add-on `aws-ebs-csi-driver`.
+
+IRSA role дозволено використовувати лише Kubernetes ServiceAccount:
+
+```text
+system:serviceaccount:kube-system:ebs-csi-controller-sa
+```
+
+Основний файл конфігурації:
+
+```text
+modules/eks/aws_ebs_csi_driver.tf
+```
+
 ### Amazon ECR
 
 Docker-образ Django зберігається в Amazon ECR:
@@ -197,6 +221,23 @@ Git-контейнер використовується для:
 * push змін до GitHub.
 
 Jenkins credentials не зберігаються у Git.
+
+Для Jenkins створюються окремі ServiceAccounts:
+
+```text
+jenkins-controller
+jenkins-agent
+```
+
+Terraform також створює namespaced `Role` і `RoleBinding`, необхідні controller-у для керування Kubernetes agent pods у namespace `jenkins`.
+
+Jenkins controller використовує `jenkins-controller`, а Kubernetes agents — `jenkins-agent`. Helm chart не створює дублікати ServiceAccount і RBAC, оскільки вони керуються Terraform.
+
+Основний файл RBAC:
+
+```text
+modules/jenkins/rbac.tf
+```
 
 ### Argo CD
 
@@ -295,6 +336,7 @@ Project/
 ├── backend.tf
 ├── variables.tf
 ├── outputs.tf
+├── django_secret.tf
 ├── Jenkinsfile
 ├── README.md
 ├── .gitignore
@@ -324,6 +366,8 @@ Project/
 │   │
 │   ├── eks/
 │   │   ├── eks.tf
+│   │   ├── aws_ebs_csi_driver.tf
+│   │   ├── providers.tf
 │   │   ├── variables.tf
 │   │   └── outputs.tf
 │   │
@@ -336,6 +380,7 @@ Project/
 │   │
 │   ├── jenkins/
 │   │   ├── jenkins.tf
+│   │   ├── rbac.tf
 │   │   ├── providers.tf
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
@@ -422,6 +467,7 @@ terraform.tfvars
 
 ```hcl
 database_password = "CHANGE_ME"
+django_secret_key = "CHANGE_ME"
 
 jenkins_admin_user     = "admin"
 jenkins_admin_password = "CHANGE_ME"
@@ -539,6 +585,7 @@ Terraform створює:
 * NAT Gateway;
 * EKS;
 * worker node group;
+* EBS CSI Driver add-on з OIDC та IRSA;
 * ECR;
 * RDS;
 * Jenkins;
@@ -558,6 +605,9 @@ terraform output
 ```text
 eks_cluster_name
 eks_cluster_endpoint
+ebs_csi_addon_name
+ebs_csi_irsa_role_arn
+eks_oidc_provider_arn
 ecr_repository_url
 database_endpoint
 database_name
@@ -898,14 +948,22 @@ DJANGO_DEBUG
 DJANGO_ALLOWED_HOSTS
 ```
 
-Секретні значення зберігаються в Kubernetes Secret:
+Секретні значення зберігаються в зовнішньому Kubernetes Secret:
 
 ```text
 POSTGRES_PASSWORD
 DJANGO_SECRET_KEY
 ```
 
-Реальні production secrets не повинні зберігатися у Git.
+У `charts/django-app/values.yaml` немає захардкоджених паролів або ключів. Helm chart містить лише посилання:
+
+```yaml
+secret:
+  create: false
+  name: django-app-secret
+```
+
+Secret `django-app-secret` створюється Terraform-ресурсом у файлі `django_secret.tf`. Значення передаються через sensitive-змінні `database_password` і `django_secret_key` з локального `terraform.tfvars`, який не додається до Git.
 
 Для production рекомендовано використовувати:
 
@@ -923,13 +981,15 @@ DJANGO_SECRET_KEY
 * RDS без public access;
 * Security Group для PostgreSQL;
 * окремі IAM roles для EKS cluster і worker nodes;
+* OIDC Provider та IRSA role для EBS CSI Driver;
+* окремі Jenkins controller/agent ServiceAccounts і namespaced RBAC;
 * ECR pull policy для worker nodes;
 * S3 encryption;
 * S3 versioning;
 * S3 public access block;
 * Terraform state locking;
 * sensitive Terraform variables;
-* Kubernetes Secret для паролів;
+* Kubernetes Secret для паролів, створений поза Helm values;
 * паролі виключені з Git через `.gitignore`.
 
 ## Перевірка фінального стану
@@ -958,6 +1018,48 @@ kubectl get servicemonitors -n monitoring
 kubectl top nodes
 kubectl top pods
 ```
+
+## Локальна перевірка останніх виправлень
+
+Якщо AWS backend або кластер тимчасово недоступні, синтаксис Terraform і Helm можна перевірити локально:
+
+```bash
+terraform fmt -recursive -check
+terraform init -backend=false
+terraform validate
+
+helm lint charts/django-app
+helm lint modules/argo_cd/charts
+```
+
+Перевірка, що Django Secret не рендериться з Git, а Deployment використовує зовнішній Secret:
+
+```bash
+helm template django-app charts/django-app > /tmp/django-final.yaml
+grep -n '^kind: Secret' /tmp/django-final.yaml
+grep -n -A 4 'secretRef:' /tmp/django-final.yaml
+```
+
+При `secret.create: false` перша команда `grep` не повинна повертати результат, а `secretRef` має містити `django-app-secret`.
+
+Перевірка ServiceAccounts Jenkins:
+
+```bash
+helm template jenkins jenkins/jenkins \
+  --namespace jenkins \
+  --version 5.9.25 \
+  -f modules/jenkins/values.yaml \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=jenkins-controller \
+  --set rbac.create=false \
+  --set agent.serviceAccount=jenkins-agent \
+  > /tmp/jenkins-final.yaml
+
+grep -n 'serviceAccountName:\|serviceAccount: "jenkins-agent"\|jenkins-controller' \
+  /tmp/jenkins-final.yaml
+```
+
+Очікується, що controller використовує `jenkins-controller`, а Kubernetes agents — `jenkins-agent`.
 
 ## Видалення інфраструктури
 
@@ -1021,5 +1123,4 @@ Direct link:
 ```text
 https://github.com/lekar89/lesson7/tree/final_project
 ```
-
 
